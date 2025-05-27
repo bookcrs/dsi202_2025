@@ -1,0 +1,72 @@
+ฃ{% extends 'myapp/base.html' %}
+{% block title %}ประวัติการสั่งซื้อ - CareME{% endblock %}
+{% block content %}
+<div class="container mx-auto py-6 px-4">
+    <!-- ใช้ Component Breadcrumbs -->
+    {% include 'myapp/components/breadcrumbs.html' with items=breadcrumbs %}
+    
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">ประวัติการสั่งซื้อ</h1>
+    
+    {% if orders %}
+        <!-- แสดงตารางบนหน้าจอขนาดใหญ่ -->
+        <div class="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            รหัสคำสั่งซื้อ
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            วันที่
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            ราคารวม
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            สถานะ
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            ดำเนินการ
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for order in orders %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ order.order_number|default:order.id }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900 dark:text-white">{{ order.created_at|date:"d M Y" }}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ order.created_at|time:"H:i" }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                {{ order.total_amount|floatformat:2 }} บาท
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% include 'myapp/components/status_badge.html' with status=order.status text=order.get_status_display %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{% url 'order_detail' order.id %}" class="text-mint hover:text-teal">
+                                    ดูรายละเอียด
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- ส่วนของ mobile view ให้แก้เช่นเดียวกัน... -->
+    {% else %}
+        {% include 'myapp/components/empty_state.html' with 
+            icon='order' 
+            title='คุณยังไม่มีประวัติการสั่งซื้อ' 
+            message='เริ่มต้นเลือกซื้อสินค้าที่คุณสนใจเพื่อเริ่มการเดินทางสู่สุขภาพที่ดีขึ้น' 
+            button_text='ดูสินค้าทั้งหมด' 
+            button_url='product_list' %}
+    {% endif %}
+</div>
+{% endblock %}

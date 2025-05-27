@@ -1,0 +1,87 @@
+{% extends 'myapp/base.html' %}
+{% block title %}การสมัครสมาชิกของฉัน - CareME{% endblock %}
+{% block content %}
+<div class="container mx-auto py-6 px-4">
+    <!-- ใช้ Component Breadcrumbs -->
+    {% include 'myapp/components/breadcrumbs.html' with items=breadcrumbs %}
+    
+    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">การสมัครสมาชิกของฉัน</h1>
+    
+    {% if subscriptions %}
+        <!-- บนหน้าจอขนาดใหญ่ แสดงเป็นตาราง -->
+        <div class="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            แพ็คเกจ
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            วันที่เริ่มต้น
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            วันที่สิ้นสุด
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            สถานะ
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for subscription in subscriptions %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ subscription.plan.name }}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ subscription.plan.get_duration_display }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900 dark:text-white">{{ subscription.start_date|date:"d M Y" }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900 dark:text-white">{{ subscription.end_date|date:"d M Y" }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% include 'myapp/components/status_badge.html' with 
+                                    status=subscription.status 
+                                    text=subscription.status|yesno:"ใช้งานอยู่,หมดอายุ,ยกเลิกแล้ว" %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- บนหน้าจอขนาดเล็ก แสดงเป็นการ์ด -->
+        <div class="md:hidden space-y-4">
+            {% for subscription in subscriptions %}
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                    <div class="flex justify-between mb-2">
+                        <div class="font-medium text-gray-900 dark:text-white">{{ subscription.plan.name }}</div>
+                        {% include 'myapp/components/status_badge.html' with 
+                            status=subscription.status 
+                            text=subscription.status|yesno:"ใช้งานอยู่,หมดอายุ,ยกเลิกแล้ว" %}
+                    </div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ subscription.plan.get_duration_display }}</div>
+                    <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <div class="text-gray-500 dark:text-gray-400">วันที่เริ่มต้น</div>
+                            <div class="font-medium text-gray-900 dark:text-white">{{ subscription.start_date|date:"d M Y" }}</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-500 dark:text-gray-400">วันที่สิ้นสุด</div>
+                            <div class="font-medium text-gray-900 dark:text-white">{{ subscription.end_date|date:"d M Y" }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        {% include 'myapp/components/empty_state.html' with 
+            icon='subscription' 
+            title='คุณยังไม่มีการสมัครสมาชิก' 
+            message='เลือกแพ็คเกจที่เหมาะกับคุณเพื่อเริ่มต้นการเดินทางสู่สุขภาพที่ดีกว่า' 
+            button_text='ดูแพ็คเกจทั้งหมด' 
+            button_url='subscription_list' %}
+    {% endif %}
+</div>
+{% endblock %}

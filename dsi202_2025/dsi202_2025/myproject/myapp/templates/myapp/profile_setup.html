@@ -1,0 +1,145 @@
+<!-- /myproject/myapp/templates/myapp/profile_setup.html -->
+{% extends 'myapp/base.html' %}
+{% block title %}ตั้งค่าโปรไฟล์ - CareME{% endblock %}
+{% block content %}
+<div class="container mx-auto py-6 px-4">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">ข้อมูลส่วนตัวสำหรับแผนสุขภาพ</h1>
+   
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-blue-600 text-white p-4">
+            <h2 class="text-xl font-semibold">ข้อมูลส่วนบุคคล</h2>
+            <p class="text-sm mt-1 text-blue-100">ข้อมูลนี้จะช่วยให้เราสร้างแผนสุขภาพที่เหมาะสมกับคุณ</p>
+        </div>
+        
+        <div class="p-6">
+            <form method="post" id="profile-form" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% include 'myapp/components/form_field.html' with field=form.birth_date required=True %}
+                    {% include 'myapp/components/form_field.html' with field=form.gender required=True %}
+                    {% include 'myapp/components/form_field.html' with field=form.height required=True %}
+                    {% include 'myapp/components/form_field.html' with field=form.weight required=True %}
+                </div>
+                
+                <div class="md:col-span-2">
+                    {% include 'myapp/components/form_field.html' with field=form.activity_level required=True %}
+                </div>
+                
+                <div class="md:col-span-2">
+                    {% include 'myapp/components/form_field.html' with field=form.medical_conditions required=False %}
+                </div>
+                
+                <div class="mt-6">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                        บันทึกข้อมูล
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('profile-form');
+        
+        form.addEventListener('submit', function(event) {
+            // Reset error messages
+            const errorMessages = document.querySelectorAll('.error-message');
+            errorMessages.forEach(element => {
+                element.style.display = 'none';
+                element.textContent = '';
+            });
+            
+            let isValid = true;
+            
+            // Validate birth date
+            const birthDateInput = document.getElementById('{{ form.birth_date.id_for_label }}');
+            if (!birthDateInput.value) {
+                document.getElementById('birth_date-error').textContent = 'กรุณาระบุวันเกิด';
+                document.getElementById('birth_date-error').style.display = 'block';
+                isValid = false;
+            } else {
+                const today = new Date();
+                const birthDate = new Date(birthDateInput.value);
+                const age = today.getFullYear() - birthDate.getFullYear();
+                
+                if (birthDate > today) {
+                    document.getElementById('birth_date-error').textContent = 'วันเกิดไม่สามารถเป็นวันในอนาคต';
+                    document.getElementById('birth_date-error').style.display = 'block';
+                    isValid = false;
+                } else if (age > 120) {
+                    document.getElementById('birth_date-error').textContent = 'อายุไม่สามารถมากกว่า 120 ปี';
+                    document.getElementById('birth_date-error').style.display = 'block';
+                    isValid = false;
+                }
+            }
+            
+            // Validate gender
+            const genderInput = document.getElementById('{{ form.gender.id_for_label }}');
+            if (!genderInput.value) {
+                document.getElementById('gender-error').textContent = 'กรุณาเลือกเพศ';
+                document.getElementById('gender-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate height
+            const heightInput = document.getElementById('{{ form.height.id_for_label }}');
+            if (!heightInput.value) {
+                document.getElementById('height-error').textContent = 'กรุณาระบุความสูง';
+                document.getElementById('height-error').style.display = 'block';
+                isValid = false;
+            } else if (isNaN(heightInput.value) || heightInput.value <= 0) {
+                document.getElementById('height-error').textContent = 'ความสูงต้องเป็นตัวเลขที่มากกว่า 0';
+                document.getElementById('height-error').style.display = 'block';
+                isValid = false;
+            } else if (heightInput.value < 50 || heightInput.value > 250) {
+                document.getElementById('height-error').textContent = 'ความสูงต้องอยู่ระหว่าง 50-250 ซม.';
+                document.getElementById('height-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate weight
+            const weightInput = document.getElementById('{{ form.weight.id_for_label }}');
+            if (!weightInput.value) {
+                document.getElementById('weight-error').textContent = 'กรุณาระบุน้ำหนัก';
+                document.getElementById('weight-error').style.display = 'block';
+                isValid = false;
+            } else if (isNaN(weightInput.value) || weightInput.value <= 0) {
+                document.getElementById('weight-error').textContent = 'น้ำหนักต้องเป็นตัวเลขที่มากกว่า 0';
+                document.getElementById('weight-error').style.display = 'block';
+                isValid = false;
+            } else if (weightInput.value < 20 || weightInput.value > 300) {
+                document.getElementById('weight-error').textContent = 'น้ำหนักต้องอยู่ระหว่าง 20-300 กก.';
+                document.getElementById('weight-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate activity level
+            const activityLevelInput = document.getElementById('{{ form.activity_level.id_for_label }}');
+            if (!activityLevelInput.value) {
+                document.getElementById('activity_level-error').textContent = 'กรุณาเลือกระดับการออกกำลังกาย';
+                document.getElementById('activity_level-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+        
+        // Add input styling on error
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                const errorElement = document.getElementById(`${this.id.replace('id_', '')}-error`);
+                if (errorElement) {
+                    errorElement.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
